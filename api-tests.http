@@ -1,0 +1,116 @@
+### ==============================================================================
+### COLECCIÓN DE PRUEBAS DE ENDPOINTS - NESTJS
+### Puedes ejecutar estas peticiones directamente con la extensión REST Client
+### o importarlas en Thunder Client / Postman.
+### Servidor base: http://localhost:3000
+### ==============================================================================
+
+@baseUrl = http://localhost:3000
+
+### -----------------------------------------------------------------------------
+### 1. PRODUCTOS: CRUD CON TYPEORM + MYSQL, QUERY PARAMS, ROUTE PARAMS Y DTOs
+### -----------------------------------------------------------------------------
+
+### 1.1 Listar todos los productos (sin filtros)
+GET {{baseUrl}}/products
+
+### 1.2 Listar productos con Query Parameters (Filtros, Búsqueda y Paginación)
+# @Query() con DTO FilterProductDto y validación
+GET {{baseUrl}}/products?search=rgb&category=Periféricos&minPrice=50&maxPrice=120&page=1&limit=5
+
+### 1.3 Obtener un producto por ID válido (@Param con ParseIntPipe)
+GET {{baseUrl}}/products/1
+
+### 1.4 Obtener un producto con ID inválido (Prueba de ParseIntPipe -> 400 Bad Request)
+GET {{baseUrl}}/products/invalido
+
+### 1.5 Obtener un producto no existente (Prueba de NotFoundException -> 404)
+GET {{baseUrl}}/products/999
+
+### 1.6 Crear un nuevo producto (@Post, @Body, @HttpCode(201), CreateProductDto)
+POST {{baseUrl}}/products
+Content-Type: application/json
+
+{
+  "name": "Micrófono USB Condensador",
+  "description": "Patrón cardioide con filtro antipop",
+  "price": 65.50,
+  "category": "Audio",
+  "tags": ["audio", "streaming", "usb"],
+  "inStock": true
+}
+
+### 1.7 Intentar crear producto con datos inválidos (Prueba de validación class-validator)
+POST {{baseUrl}}/products
+Content-Type: application/json
+
+{
+  "name": "No",
+  "price": -10,
+  "category": ""
+}
+
+### 1.8 Actualización completa con PUT (@Put, @Param, @Body, UpdateProductDto)
+PUT {{baseUrl}}/products/1
+Content-Type: application/json
+
+{
+  "name": "Teclado Mecánico RGB v2 PRO",
+  "description": "Switch óptico lineal ultra-rápido",
+  "price": 119.99,
+  "category": "Periféricos",
+  "tags": ["gaming", "teclado", "pro", "optico"],
+  "inStock": true
+}
+
+### 1.9 Actualización parcial con PATCH (@Patch, @Param, @Body, PartialType)
+PATCH {{baseUrl}}/products/2
+Content-Type: application/json
+
+{
+  "price": 39.99,
+  "inStock": false
+}
+
+### 1.10 Eliminar un producto (@Delete, @Param con ParseIntPipe)
+DELETE {{baseUrl}}/products/3
+
+
+### -----------------------------------------------------------------------------
+### 2. MANEJO DE ARCHIVOS Y MULTIPART / FORM-DATA
+### -----------------------------------------------------------------------------
+
+### 2.1 Listar archivos subidos en el servidor
+GET {{baseUrl}}/files/list
+
+### 2.2 Descargar o hacer streaming de un archivo guardado (StreamableFile)
+# Cambia el nombre por uno que exista tras realizar una subida
+GET {{baseUrl}}/files/download/ejemplo.txt
+
+
+### -----------------------------------------------------------------------------
+### 3. CASOS AVANZADOS: HEADERS, IP, STATUS CODES, PIPES NATIVOS, REDIRECT
+### -----------------------------------------------------------------------------
+
+### 3.1 Inspeccionar petición HTTP (@Ip, @Headers('user-agent'), @Headers())
+GET {{baseUrl}}/examples/inspect-request
+Authorization: Bearer mi-token-de-prueba-jwt-12345
+X-Custom-Client-Id: client-alpha-99
+
+### 3.2 Obtener cabeceras HTTP de respuesta personalizadas (@Header)
+GET {{baseUrl}}/examples/custom-headers
+
+### 3.3 Pipes nativos de transformación (ParseBoolPipe, ParseArrayPipe, DefaultValuePipe)
+GET {{baseUrl}}/examples/pipes-showcase?active=true&tags=nest,typescript,backend&page=10
+
+### 3.4 Código de estado HTTP personalizado (@HttpCode(202 Accepted))
+POST {{baseUrl}}/examples/custom-status
+
+### 3.5 Redirección estática / dinámica (@Redirect)
+GET {{baseUrl}}/examples/redirect-demo?docs=true
+
+### 3.6 Interoperabilidad con Express Response (@Res({ passthrough: true }))
+GET {{baseUrl}}/examples/express-interop
+
+### 3.7 Resumen de la API en formato JSON
+GET {{baseUrl}}/api
